@@ -130,4 +130,6 @@ dmypy.json
 .pyre/
 
 # django DB management
+.idea/
 migrations/
+_media/
