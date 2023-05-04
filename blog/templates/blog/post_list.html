@@ -86,14 +86,22 @@
 
   <div class="container my-3">
     <div class="row">
-      <div class="col-md-8 col-lg-9">
+      <div class="col-md-8 col-lg-9" id="main-area">
+      {% if post_list.exists %}
         {% for p in post_list %}
         <!-- Blog post-->
         <div class="card mb-4">
-          <a href="#!"><img class="card-img-top" src="{{ p.head_image.url }}" alt="Card image cap" /></a>
+          {% if p.head_image %}
+          <a href="#!"><img class="card-img-top" src="{{ p.head_image.url }}" alt="{{p}} head image" /></a>
+          {% else %}
+          <img class="card-img-top" src="https://picsum.photos/seed/{{p.id}}/800/200" alt="random image" /></a>
+          {% endif %}
           <div class="card-body">
             <h2 class="card-title h4">{{ p.title }}</h2>
-            <p class="card-text">{{ p.content }}</p>
+            {% if p.hook_text %}
+              <h5 class="text-muted">{{ p.hook_text }}</h5>"
+            {% endif %}
+            <p class="card-text">{{ p.content | truncatewords:45 }}</p>
             <a class="btn btn-primary" href="{{ p.get_absolute_url}}">Read more →</a>
           </div>
           <div class="card-footer text-muted">
@@ -102,6 +110,9 @@
           </div>
         </div>
         {% endfor %}
+      {% else %}
+        <h3>아직 게시물이 없습니다.</h3>
+      {% endif %}
 
         <!-- Pagination-->
         <nav aria-label="Pagination">
