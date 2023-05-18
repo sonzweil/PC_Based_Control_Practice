@@ -1,12 +1,16 @@
 {% extends 'blog/base.html' %}
-
 {% block head_title %}
   {{ post.title }} - Blog
 {% endblock %}
-
 {% block main_area %}
+
 <!-- Page content-->
 <div class="col-lg-8" id="post-area">
+  {% if post.category %}
+    <span class="badge badge-secondary float-right">{{ post.category }}</span>
+  {% else %}
+    <span class="badge badge-secondary float-right">미분류</span>
+  {% endif %}
   <!-- Post content-->
   <article>
     <!-- Post header-->
