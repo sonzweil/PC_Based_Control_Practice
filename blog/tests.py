@@ -10,6 +10,8 @@ class TestView(TestCase):
         self.client = Client()
         self.user_trump = User.objects.create_user(username='trump', password='somepassword')
         self.user_obama = User.objects.create_user(username='obama', password='somepassword')
+        self.user_obama.is_staff = True
+        self.user_obama.save()
 
         self.category_programming = Category.objects.create(name='Programming', slug='Programming')
         self.category_music = Category.objects.create(name='music', slug='music')
@@ -44,7 +46,10 @@ class TestView(TestCase):
         self.assertNotEqual(response.status_code, 200)        
         
         self.client.login(username='trump', password='somepassword')
+        response = self.client.get('/blog/create_post/')
+        self.assertNotEqual(response.status_code, 200)
 
+        self.client.login(username='obama', password='somepassword')
         response = self.client.get('/blog/create_post/')
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -52,6 +57,7 @@ class TestView(TestCase):
         self.assertEqual('Create Post - Blog', soup.title.text)
         main_area = soup.find('div', id='main-area')
         self.assertIn('Create New Post', main_area.text)
+
         self.client.post(
             '/blog/create_post/',
             {
@@ -61,7 +67,7 @@ class TestView(TestCase):
         )
         last_post = Post.objects.last()
         self.assertEqual(last_post.title, "Post Form 만들기")
-        self.assertEqual(last_post.author.username, 'trump')
+        self.assertEqual(last_post.author.username, 'obama')
 
     def test_tag_page(self):
         response = self.client.get(self.tag_hello.get_absolute_url())
