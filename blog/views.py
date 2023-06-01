@@ -1,6 +1,9 @@
 from typing import Any, Dict
-from django.shortcuts import render
-from django.views.generic import ListView, DetailView
+from django.forms.models import BaseModelForm
+from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Post, Category, Tag
 
 class PostList(ListView):
@@ -47,7 +50,6 @@ def category_page(request, slug):
         }
     )
 
-
 class PostDetail(DetailView):
     model = Post
     def get_context_data(self, **kwargs):
@@ -56,26 +58,14 @@ class PostDetail(DetailView):
         context['no_category_post_count'] = Post.objects.filter(category=None).count()
         return context
 
+class PostCreate(LoginRequiredMixin, CreateView):
+    model = Post
+    fields = ['title', 'hook_text', 'content', 'head_image', 'file_upload', 'category']
 
-# # Create your views here.
-# def index(request):
-#     posts = Post.objects.all().order_by('-pk')
-
-#     return render(
-#         request,
-#         'blog/index.html',
-#         {
-#             'posts' : posts,
-#         }
-#     )
-
-# def single_post_page(request, pk):
-#     post = Post.objects.get(pk=pk)
-
-#     return render(
-#         request,
-#         'blog/single_post_page.html',
-#         {
-#             'post' : post,
-#         }
-#     )
+    def form_valid(self, form): 
+        current_user = self.request.user
+        if current_user.is_authenticated:
+            form.instance.author = current_user
+            return super(PostCreate, self).form_valid(form)
+        else:
+            return redirect('/blog/')
